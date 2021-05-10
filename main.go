@@ -13,35 +13,15 @@ import (
 )
 
 func resizeImage(c echo.Context) error {
-	c.Logger().Info("resize")
-	file, err := c.FormFile("file")
-	if err != nil {
-		return err
-	}
-
-	image, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer image.Close()
-
-	img, err := jpeg.Decode(image)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	m := resize.Resize(120, 120, img, resize.Lanczos3)
-
-	buf := new(bytes.Buffer)
-	jpeg.Encode(buf, m, nil)
-
-	return c.Blob(http.StatusOK, "image/jpeg", buf.Bytes())
-}
-
-func resizeImageV2(c echo.Context) error {
 	imageSrc := c.QueryParam("imageSrc")
 	width, err := strconv.ParseUint(c.QueryParam("width"), 10, 64)
+	if err != nil {
+		width = 150
+	}
 	height, err := strconv.ParseUint(c.QueryParam("height"), 10, 64)
+	if err != nil {
+		height = 150
+	}
 	c.Logger().Infof("[%s] is going to be resized to [%d, %d]", imageSrc, width, height)
 
 	res, err := http.Get(imageSrc)
@@ -70,8 +50,7 @@ func main() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
-	e.POST("/v1/api/images/resize", resizeImage)
-	e.GET("/v2/api/images/resize", resizeImageV2)
+	e.GET("/v1/api/images/resize", resizeImage)
 	e.GET("/v1/api/healthcheckz", func(c echo.Context) error {
 		c.Logger().Info("health check")
 		return c.String(http.StatusOK, "healthy")
