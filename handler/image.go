@@ -33,5 +33,5 @@ func (h *Handler) resize(c echo.Context) error {
 	buf := new(bytes.Buffer)
 	jpeg.Encode(buf, m, nil)
 
-	return c.JSONBlob(http.StatusOK, buf.Bytes())
+	return c.Blob(http.StatusOK, "image/jpeg", buf.Bytes())
 }

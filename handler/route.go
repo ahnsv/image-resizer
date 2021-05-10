@@ -5,6 +5,9 @@ import (
 )
 
 func (h *Handler) Register(v1 *echo.Group) {
-	images := v1.Group("images")
+	images := v1.Group("/images")
 	images.POST("/resize", h.resize)
+
+	healthcheck := v1.Group("/healthcheckz")
+	healthcheck.GET("/", h.healthcheckz)
 }
